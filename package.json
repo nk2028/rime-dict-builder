@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "commander": "^9.2.0",
+    "qieyun": "syimyuzya/qieyun-js#dist-dev",
+    "qieyun-examples": "syimyuzya/qieyun-examples#dist-dev"
+  }
+}
