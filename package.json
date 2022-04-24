@@ -3,7 +3,7 @@
   "type": "module",
   "dependencies": {
     "commander": "^9.2.0",
-    "qieyun": "syimyuzya/qieyun-js#dist-dev",
-    "qieyun-examples": "syimyuzya/qieyun-examples#dist-dev"
+    "qieyun": "^0.13.0",
+    "qieyun-examples": "^20220424.0.0"
   }
 }
