@@ -94,10 +94,12 @@ function makeConverter(derive, special地位) {
       const sub = special地位[x.slice(1)];
       if (!sub) {
         throw new Error(`unhandled special 地位: ${x}`);
-      } else if (sub.startsWith("!")) {
+      } else if (sub.startsWith(">")) {
         return sub.slice(1);
+      } else if (sub.startsWith("=")) {
+        x = sub.slice(1);
       } else {
-        x = sub;
+        throw new Error(`invalid instruction for special 地位 ${x}: ${sub}`);
       }
     }
     if (cache.has(x)) {
@@ -269,18 +271,15 @@ if (!names.size) {
   process.exit(2);
 }
 
+const deriveTupa = tupa.schema({ 模式: "寬鬆" });
+
 /** @type {[string, (描述: string) => string][]} */
 const schemas = Array.from(names).map((name) => {
   switch (name) {
     case "tupa":
-      return [
-        name,
-        makeConverter((x) => tupa(x, null, { 模式: "寬鬆" }), {
-          精一侵上: "!tsoimq",
-        }),
-      ];
+      return [name, makeConverter(deriveTupa, { 精一侵上: ">tsoimq" })];
     case "kyonh":
-      return [name, makeConverter(kyonh, { 精一侵上: "莊侵上" })];
+      return [name, makeConverter(kyonh, { 精一侵上: "=莊侵上" })];
     default:
       console.error(`unknown schema: ${name}`);
       process.exit(1);
