@@ -1,8 +1,6 @@
 # rime-dict-builder
 
-Build [rime-tupa](https://github.com/ayaka14732/rime-tupa)/[rime-kyonh](https://github.com/ayaka14732/rime-kyonh) dicts from [rime-dict-source](https://github.com/nk2028/rime-dict-source).
-
-(NOTE: requires beta version of Qieyun.js & qieyun-examples)
+Build [rime-tupa](https://github.com/nk2028/rime-tupa) dicts from [rime-dict-source](https://github.com/nk2028/rime-dict-source).
 
 Usage:
 

@@ -1,14 +1,14 @@
 // @ts-check
 
-import fs, { createReadStream, createWriteStream, existsSync } from "fs";
-import path from "path";
-import { createInterface } from "readline";
-import { pipeline } from "stream/promises";
+import fs, { createReadStream, createWriteStream } from "node:fs";
+import path from "node:path";
+import { createInterface } from "node:readline";
+import { pipeline } from "node:stream/promises";
 
 import { program } from "commander";
 
-import { 音韻地位 } from "qieyun";
-import { kyonh, tupa } from "qieyun-examples";
+import TshetUinh, { 音韻地位 } from "tshet-uinh";
+import { 推導方案 } from "tshet-uinh-deriver-tools";
 
 // Sorting
 
@@ -29,6 +29,7 @@ function compareFullUnicode(x, y) {
     }
     const cx = nx.done ? -1 : nx.value.codePointAt(0);
     const cy = ny.done ? -1 : ny.value.codePointAt(0);
+    // @ts-ignore
     const diff = cx - cy;
     if (diff) {
       return diff;
@@ -240,53 +241,29 @@ program
   .option(
     "-v, --dict-version <version>",
     "version string in built dict, default to current date"
-  )
-  .argument(
-    "[schemas...]",
-    "schemas to generate; can be autodetected from <name>.schema.yaml if not specified"
   );
 
 program.parse();
 
 const { source, dictVersion = today } = program.opts();
 
-/** @type {Set<string>} */
-const names = new Set(program.args);
-
-const kAllNames = ["tupa", "kyonh"];
-
-if (!names.size) {
-  for (const name of kAllNames) {
-    if (existsSync(`./${name}.schema.yaml`)) {
-      names.add(name);
-    }
-  }
-  console.log(`detected: ${Array.from(names).join(", ")}`);
-}
-
-if (!names.size) {
-  console.error(
-    `no schema specified, and no {${kAllNames}}.schema.yaml detected`
-  );
-  process.exit(2);
-}
-
-const deriveTupa = tupa.schema({ 模式: "寬鬆" });
-
-/** @type {[string, (描述: string) => string][]} */
-const schemas = Array.from(names).map((name) => {
-  switch (name) {
-    case "tupa":
-      return [name, makeConverter(deriveTupa, { 精一侵上: ">tsoimq" })];
-    case "kyonh":
-      return [name, makeConverter(kyonh, { 精一侵上: "=莊侵上" })];
-    default:
-      console.error(`unknown schema: ${name}`);
-      process.exit(1);
-  }
+const tupaCode = fs.readFileSync(path.join(import.meta.dirname, "tupa.js"), {
+  encoding: "utf-8",
 });
+/** @type {import("tshet-uinh-deriver-tools").原始推導函數<string>} */
+const tupaRawDeriver = new Function(
+  "TshetUinh",
+  "選項",
+  "音韻地位",
+  "字頭",
+  tupaCode
+).bind(null, TshetUinh);
+const deriveTupa = new 推導方案(tupaRawDeriver)();
 
-for (const [name, conv] of schemas) {
-  console.log(`generating ${name}...`);
-  generate(name, conv, source, dictVersion);
-}
+console.log("generating tupa...");
+generate(
+  "tupa",
+  makeConverter(deriveTupa, { 精開一侵上: ">tsoymq" }),
+  source,
+  dictVersion
+);

@@ -1,9 +1,10 @@
 {
+  "name": "rime-dict-builder",
   "private": true,
   "type": "module",
   "dependencies": {
-    "commander": "^9.2.0",
-    "qieyun": "^0.13.5",
-    "qieyun-examples": "^20220826.0.2"
+    "commander": "^12.1.0",
+    "tshet-uinh": "^0.15.0",
+    "tshet-uinh-deriver-tools": "^0.2.0"
   }
 }
