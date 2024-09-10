@@ -10,7 +10,9 @@ Usage:
     npm i
     ```
 
-2.  `cd` to dir containing `{tupa,kyonh}.schema.dict`
+2.  (optional) `cd` to the directory containing `tupa.schema.dict`
+
+3.  Run the build script
 
     ```sh
     node <path to rime-dict-builder>/build.js
