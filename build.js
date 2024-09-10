@@ -151,9 +151,10 @@ async function extendFromTsv(dict, base, filename, conv) {
  * @param {string} name
  * @param {(描述: string) => string} conv
  * @param {string} source
+ * @param {string} dest
  * @param {string} version
  */
-async function generate(name, conv, source, version) {
+async function generate(name, conv, source, dest, version) {
   version = JSON.stringify(version);
   const dictHeader = `# Rime dictionary
 # encoding: utf-8
@@ -198,31 +199,31 @@ sort: by_weight
 `;
 
   const dict = [];
-  console.log("  reading chars");
+  console.log("  reading chars.tsv");
   await extendFromTsv(dict, source, "chars.tsv", conv);
-  console.log("  reading words");
+  console.log("  reading words.tsv");
   await extendFromTsv(dict, source, "words.tsv", conv);
 
   const dictWords = [];
-  console.log("  reading extra_words");
+  console.log("  reading extra_words.tsv");
   await extendFromTsv(dictWords, source, "extra_words.tsv", conv);
 
-  console.log("  writing dict");
+  console.log(`  writing ${name}.dict.yaml`);
   await pipeline(
     uniqSortedLines(dict, dictHeader),
-    createWriteStream(`${name}.dict.yaml`)
+    createWriteStream(path.join(dest, `${name}.dict.yaml`))
   );
 
-  console.log("  writing words");
+  console.log(`  writing ${name}.words.dict.yaml`);
   await pipeline(
     uniqSortedLines(dictWords, dictWordsHeader),
-    createWriteStream(`${name}.words.dict.yaml`)
+    createWriteStream(path.join(dest, `${name}.words.dict.yaml`))
   );
 
-  console.log("  writing unspaced");
+  console.log(`  writing ${name}_unspaced.dict.yaml`);
   await pipeline(
     uniqSortedLines(dict.concat(dictWords), dictUnspacedHeader, true),
-    createWriteStream(`${name}_unspaced.dict.yaml`)
+    createWriteStream(path.join(dest, `${name}_unspaced.dict.yaml`))
   );
 }
 
@@ -238,6 +239,7 @@ program
     "path to dir containing source TSVs",
     "../rime-dict-source"
   )
+  .option("-d, --dest <dir>", "path to the dir to put built files", ".")
   .option(
     "-v, --dict-version <version>",
     "version string in built dict, default to current date"
@@ -245,7 +247,7 @@ program
 
 program.parse();
 
-const { source, dictVersion = today } = program.opts();
+const { source, dest, dictVersion = today } = program.opts();
 
 const tupaCode = fs.readFileSync(path.join(import.meta.dirname, "tupa.js"), {
   encoding: "utf-8",
@@ -265,5 +267,6 @@ generate(
   "tupa",
   makeConverter(deriveTupa, { 精開一侵上: ">tsoymq" }),
   source,
+  dest,
   dictVersion
 );
